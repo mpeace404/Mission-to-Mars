@@ -11,6 +11,9 @@ def scrape_all():
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=True)
 
+    #In the def scrape_all() function in your scraping.py file, create a new dictionary in the data dictionary to hold a list of dictionaries with the URL string and title of each hemisphere image.
+    # store hemisphere data as a list of dictionaries, one dictionary for each hemisphere data.
+    mars_hemi_dict = scrape_hemi_data(browser)
     news_title, news_paragraph = mars_news(browser)
 
     # Run all scraping functions and store results in a dictionary
@@ -19,7 +22,8 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "hemi_data": mars_hemi_dict
     }
 
     # Stop webdriver and return data
@@ -96,6 +100,33 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
+
+def scrape_hemi_data(browser)
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(url)
+
+    html = browser.html
+    hemi_soup = soup(html, 'html.parser')
+
+    hemisphere_image_urls = []
+    main_url = hemi_soup.find_all('div', class_='item')
+
+    for detail in main_url:
+        title = detail.find('h3').text
+        mars_url = detail.find('a')['href']
+        hemi_url = f'https://astrogeology.usgs.gov/{mars_url}'
+    #hemi_url
+        browser.visit(hemi_url)
+        html = browser.html
+        mars_soup = soup(html, 'html.parser')
+        original_img = mars_soup.find('div',class_='downloads')
+        hemi_img_url = original_img.find('a')['href']
+        
+        print(hemi_img_url)
+        img_data = dict({'title':title, 'img_url':hemi_img_url})
+        hemisphere_image_urls.append(img_data)
+
+return hemisphere_image_urls
 
 if __name__ == "__main__":
 
